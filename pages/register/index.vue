@@ -124,52 +124,44 @@ export default {
     };
   },
   methods: {
-    async register() {
+    register() {
       try {
         // Attempt to register the user
-        await this.$axios.$post("/register", this.model);
-
-        // Attempt to login the user
-        const res = await this.$auth.loginWith("local", {
-          data: {
-            email: this.model.email,
-            password: this.model.password,
-          },
+        this.$axios.$post("/register", this.model).then((res) => {
+          console.log("res", res);
+          if (res.success) {
+            this.$swal({
+              icon: "success",
+              title: res.message,
+              toast: true,
+              position: "top-right",
+              showConfirmButton: false,
+              timer: 3000,
+              timerProgressBar: true,
+            });
+            this.$router.push("/dashboard");
+          } else if (!(res.success)) {
+            this.$swal({
+              icon: "error",
+              title: res.message,
+              toast: true,
+              position: "top-right",
+              showConfirmButton: false,
+              timer: 3000,
+              timerProgressBar: true,
+              didOpen: (toast) => {
+                toast.addEventListener("mouseenter", this.$swal.stopTimer);
+                toast.addEventListener("mouseleave", this.$swal.resumeTimer);
+              },
+            });
+          } else {
+            alert("Somthing went wrong");
+          }
         });
-
-        if (res.data.success) {
-          console.log(res.data.message)
-          console.log(res)
-          this.$swal({
-            icon: "success",
-            title: res.data.message,
-            toast: true,
-            position: "top-right",
-            showConfirmButton: false,
-            timer: 3000,
-            timerProgressBar: true,
-          });
-          this.$router.push("/dashboard");
-        }else if(!(res.data.success)){
-          console.log(res)
-          console.log(res.data.message)
-          this.$swal({
-            icon: "error",
-            title: res.data?.message,
-            toast: true,
-            position: "top-right",
-            showConfirmButton: false,
-            timer: 3000,
-            timerProgressBar: true,
-          });
-        }
-        else{
-          alert("else is run ")
-        }
       } catch (err) {
         this.$swal({
           icon: "error",
-          text: err.res.message,
+          text: err.res.data.message,
           toast: true,
           position: "top-right",
           showConfirmButton: false,
